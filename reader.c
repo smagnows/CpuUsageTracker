@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "reader.h"
 #include "printError.h"
 
@@ -69,7 +68,6 @@ int saveToStruct(char *data, struct datas *str, short cpuCount)
 			++count;
 		}
 	}
-//	printf("Count: %d\n",count);
 	return count;
 }
 
@@ -83,7 +81,6 @@ struct datas *readData(int *cpuCounts, int*numberCounts)
 	if((*cpuCounts)<0) getCpuNumberCount(cpuUsage,cpuCounts,numberCounts);
 	temp->cpuCount = *cpuCounts;
 	temp->numberCount = *numberCounts;
-	//printf("\nCPUCPUCOUNT: %d\n",temp->cpuCount);
 	char dataFromFile[121];
 	fgets(dataFromFile,120,cpuUsage);
 	int numberCount = temp->numberCount;
@@ -98,61 +95,50 @@ struct datas *readData(int *cpuCounts, int*numberCounts)
 	return temp;
 }
 
-void readStruct(struct datas *st)
+void readStruct(double* cpuPercentage, int n)
 {
-	int cpuCount = st->cpuCount;
-	int numberCount = st->numberCount;
-//	printf("DEBUG\n");
-/*                for(int i=0;i<cpuCount;++i)
-                        for(int j=0;j<numberCount;++j)
-                                printf("CPU: %d, NUMBER: %d: %d\n",i,j,st->numbers[j][i]);*/
+                for(int i=0;i<n;++i)
+                	printf("CPU %d: %.2f%%\t\t",i,cpuPercentage[i]);
+		printf("\n");
 }
 
-void analyze(struct datas *st, struct datas *st2)
+void analyze(struct datas *st, struct datas *st2, double *cpuPercentage)
 {
 	if((st->numberCount)<8) return;
 	double totald[st->cpuCount];
 	double idled[st->cpuCount];
-	double cpuPercentage[st->cpuCount];
 	for(int i=0;i<st->cpuCount;++i)
 	/*
 	 *      user    	nice   		system  	idle      	iowait 		irq   		softirq  	steal  		guest  		guest_nice
 	 *  cpu numbers[0][i]   numbers[1][i]   numbers[2][i]	numbers[3][i]	numbers[4][i]	numbers[5][i]	numbers[6][i]	numbers[7][i]	numbers[8][i]	numbers[9][i]
 	 */
-		{
-			totald[i] = (double) st2->numbers[3][i]+ st2->numbers[4][i] + st2->numbers[0][i]+ st2->numbers[1][i] + st2->numbers[2][i]+ st2->numbers[5][i]+ st2->numbers[6][i] + st2->numbers[7][i] - (st->numbers[3][i] + st->numbers[4][i] + st->numbers[0][i]+ st->numbers[1][i] + st->numbers[2][i]+ st->numbers[5][i]+ st->numbers[6][i] + st->numbers[7][i]);
-			idled[i] = (double)st2->numbers[3][i]+ st2->numbers[4][i] - (st->numbers[3][i] + st->numbers[4][i]);
-			cpuPercentage[i] = (totald[i] - idled[i])/totald[i];
-			printf("CPU %d: %.2f%%\t\t",i,100.0*cpuPercentage[i]);
-		}
-		printf("\n");
-		return;
+	{
+		totald[i] = (double) st2->numbers[3][i]+ st2->numbers[4][i] + st2->numbers[0][i]+ st2->numbers[1][i] + st2->numbers[2][i]+ st2->numbers[5][i]+ st2->numbers[6][i] + st2->numbers[7][i] - (st->numbers[3][i] + st->numbers[4][i] + st->numbers[0][i]+ st->numbers[1][i] + st->numbers[2][i]+ st->numbers[5][i]+ st->numbers[6][i] + st->numbers[7][i]);
+		idled[i] = (double)st2->numbers[3][i]+ st2->numbers[4][i] - (st->numbers[3][i] + st->numbers[4][i]);
+		cpuPercentage[i] = (totald[i] - idled[i])/totald[i];
+	}
+	return;
 
-//			st->numbers[0][i]+=st->numbers[j][i];
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-	//printf("Main1\n");
 	int cpuCount = -1;
-	int numberCount=-1;
+	int numberCount = -1;
 	struct datas *struktura = readData(&cpuCount,&numberCount);
 	struct datas *struktura2;
-	//sleep (1);
-	//struktura2=readData();
-	//readStruct(struktura);
+	double *cpuPercentage = malloc(sizeof(double)*cpuCount);
 	int i=0;
 	do{
 		sleep(2);
 		struktura2=readData(&cpuCount,&numberCount);
-		analyze(struktura,struktura2);
+		analyze(struktura,struktura2,cpuPercentage);
+		readStruct(cpuPercentage,cpuCount);
 		free(struktura);
 		struktura=struktura2;
 		++i;
 	}while(i<10);
-	//readStruct(struktura);
 	free(struktura);
-
-	//printf("Main2\n");
+	free(cpuPercentage);
 	return 0;
 }
