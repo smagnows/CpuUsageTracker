@@ -22,6 +22,7 @@ int cpuUsageFileClose(FILE* file)
 
 void getCpuNumberCount(FILE *proc, int* cpuCount, int* numberCount)
 {
+	printf("\ngetCpuNumberFunction\n");
 	int cPcount=0, nUcount=0;
 	char temp[128];
 	rewind(proc);
@@ -115,7 +116,7 @@ void analyze(struct datas *st, struct datas *st2, double *cpuPercentage)
 	{
 		totald[i] = (double) st2->numbers[3][i]+ st2->numbers[4][i] + st2->numbers[0][i]+ st2->numbers[1][i] + st2->numbers[2][i]+ st2->numbers[5][i]+ st2->numbers[6][i] + st2->numbers[7][i] - (st->numbers[3][i] + st->numbers[4][i] + st->numbers[0][i]+ st->numbers[1][i] + st->numbers[2][i]+ st->numbers[5][i]+ st->numbers[6][i] + st->numbers[7][i]);
 		idled[i] = (double)st2->numbers[3][i]+ st2->numbers[4][i] - (st->numbers[3][i] + st->numbers[4][i]);
-		cpuPercentage[i] = (totald[i] - idled[i])/totald[i];
+		cpuPercentage[i] = 100.0* (totald[i] - idled[i])/totald[i];
 	}
 	return;
 
